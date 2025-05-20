@@ -27,6 +27,7 @@ all:
     login_banner_msg: "\nAuthorized uses only. All activity may be monitored\n"
     helpdesk_email: "helpdesk@home.org"
     helpdesk_phone: "777777777"
+    ansible_ip: 192.168.11.10
     ################  common ################
     common:
       satellite:

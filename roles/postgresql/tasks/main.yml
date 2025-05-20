@@ -11,10 +11,11 @@
 
     - name: extract compressed apps into /product/[app_dir]
       ansible.builtin.unarchive:
-        src: "files/{{ apps.postgresql.compressed }}"
+        src: "http://{{ ansible_ip }}/download/{{ apps.postgresql.compressed }}"
         dest: "{{ apps.postgresql.app_base_dir }}"
         owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
         group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        remote_src: yes
 
     - name: create ver sym links
       ansible.builtin.file:

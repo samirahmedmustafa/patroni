@@ -4,8 +4,9 @@
   block:
     - name: extract compressed apps into /product/[app_dir]
       ansible.builtin.unarchive:
-        src: "files/{{ apps.etcd.compressed }}"
+        src: "http://{{ ansible_ip }}/download/{{ apps.etcd.compressed }}"
         dest: "/tmp/"
+        remote_src: yes
 
     - name: copy the etcd binaries in the remote machines
       ansible.builtin.copy:
