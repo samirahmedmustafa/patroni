@@ -1,0 +1,18 @@
+---
+- hosts: DB
+  become: yes
+  gather_facts: false
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - role: groups
+      tags: groups
+    - role: users
+      tags: users
+    - role: postgresql
+      tags: postgresql
+    - role: patroni
+      tags: patroni
+

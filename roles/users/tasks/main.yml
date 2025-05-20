@@ -1,0 +1,46 @@
+---
+# tasks file for roles/users
+
+- name: Add the users
+  ansible.builtin.user:
+    name: "{{ item.user.name }}"
+    shell: "{{ item.user.shell }}"
+    groups: "{{ item.user.groups }}"
+    home: "{{ item.user.home}}"
+    uid: "{{ item.user.uid }}"
+    generate_ssh_key: "{{ item.user.generate_ssh_key }}"
+    ssh_key_file: "{{ item.user.ssh_key_file }}"
+    ssh_key_bits: "{{ item.user.ssh_key_bits }}"
+    password: "{{ item.user.password }}"
+    update_password: always
+    append: yes
+    create_home: yes
+  loop: "{{ servers[group_names[0]]['sys_users'] }}"
+
+- name: fetch ssh pub keys
+  block:
+    - name: fetch ssh pub keys
+      ansible.builtin.fetch:
+        src: "~{{ item.user.name }}/.ssh/id_rsa.pub"
+        dest: "roles/users/files/{{ hostvars[inventory_hostname]['inventory_hostname'] }}_{{ item.user.name }}_id_rsa.pub"
+        flat: yes
+      loop: "{{ servers[group_names[0]]['sys_users'] }}"
+
+    - name: disable ssh verification by push config file
+      ansible.builtin.copy:
+        src: "templates/config.j2"
+        dest: "~{{ item.user.name }}/.ssh/config"
+        owner: "{{ item.user.name }}"
+        group: "{{ item.user.groups }}"
+      loop: "{{ servers[group_names[0]]['sys_users'] }}"
+
+    - name: Set authorized key taken from file
+      include_tasks: authkeys_copy.yaml
+      loop: "{{ servers[group_names[0]]['sys_users'] }}"
+  when: group_names[0] == "MA" or group_names[0] == "MI" or group_names[0] == "DB"
+
+- name: loop over all server users
+  include_tasks: copy_profiles.yaml
+  loop: "{{ servers[group_names[0]]['sys_users'] }}"
+  tags: loop_over_all
+

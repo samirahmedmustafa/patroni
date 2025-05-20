@@ -1,0 +1,9 @@
+---
+# tasks file for roles/groups
+- name: Ensure groups exists with correct gid [groups]
+  ansible.builtin.group:
+    name: "{{ item.name }}"
+    state: present
+    gid: "{{ item.gid }}"
+  loop: "{{ servers[group_names[0]]['sys_groups'] }}"
+

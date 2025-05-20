@@ -1,0 +1,26 @@
+---
+# tasks file for roles/etcd
+- name: deploy etcd runtime
+  block:
+    - name: extract compressed apps into /product/[app_dir]
+      ansible.builtin.unarchive:
+        src: "files/{{ apps.etcd.compressed }}"
+        dest: "/tmp/"
+
+    - name: copy the etcd binaries in the remote machines
+      ansible.builtin.copy:
+        src: "/tmp/{{ apps.etcd.version }}/{{ item }}"
+        dest: "/usr/bin/"
+        mode: 0655
+        remote_src: yes
+      loop:
+        - etcdutl
+        - etcdctl
+        - etcd
+    - name: write etcd jinj2 templates
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+          #notify: restart_tomcat
+      loop: "{{ apps.etcd.templates }}"
+

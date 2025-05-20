@@ -1,0 +1,171 @@
+---
+ETCD:
+  hosts:
+    etcdhaproxy01:
+      ansible_host: 192.168.11.28
+    etcdhaproxy02:
+      ansible_host: 192.168.11.29
+    etcdhaproxy03:
+      ansible_host: 192.168.11.30
+  vars:
+    ports: []
+    environ: runtime
+DB:
+  hosts:
+    patroni1:
+      ansible_host: 192.168.11.31
+    patroni2:
+      ansible_host: 192.168.11.32
+    patroni3:
+      ansible_host: 192.168.11.33
+  vars:
+    ports: []
+    environ: runtime
+all:
+  vars:
+    ###################################### satellite vars | common vars #####################################
+    login_banner_msg: "\nAuthorized uses only. All activity may be monitored\n"
+    helpdesk_email: "helpdesk@home.org"
+    helpdesk_phone: "777777777"
+    ################  common ################
+    common:
+      satellite:
+        ip: "NA"  # [NA|IP address]
+        os: "RedHat9"
+        key: "home-rhel9-ak-dev"
+        org_id: "HOME"
+        repos:
+          - rhel-9-for-x86_64-baseos-rpms
+          - rhel-9-for-x86_64-appstream-rpms
+          - codeready-builder-for-rhel-9-x86_64-rpms
+          - satellite-client-6-for-rhel-9-x86_64-rpms
+          # - codeready-builder-for-rhel-9-x86_64-debug-rpms
+
+      org: "HOME"
+
+      selinux_state: "permissive" # /etc/selinux/config
+      ClientAliveInterval: 3600   # /etc/ssh/sshd_config
+      ClientAliveCountMax: 24     # /etc/ssh/sshd_config
+      value_for_gpg: "yes"
+      tmout:
+        TMOUT: 0
+        conf: /etc/profile.d/tmout.sh
+
+      max_log_file_action: ignore
+
+      audit_dirs:
+        - /product
+        - /abbrt
+        - /etc
+
+      sshkeys:
+        - MA
+        - MI
+        - DB
+        - IW
+        - OL
+        - OW
+
+      repos:
+        - rhel-9-for-x86_64-baseos-rpms
+        - rhel-9-for-x86_64-appstream-rpms
+        - codeready-builder-for-rhel-9-x86_64-rpms
+        - satellite-client-6-for-rhel-9-x86_64-rpms
+      #  - codeready-builder-for-rhel-9-x86_64-debug-rpms
+
+      ports:
+        - "22/tcp"
+
+      services:
+        - ssh
+
+      remounts:
+        - "/var"
+        - "/var/tmp"
+        - "/var/log"
+        - "/var/log/audit"
+        - "/home"
+
+      local_conf: /etc/locale.conf
+      locale: en_US.UTF-8 # e.g. ja_JP.UTF-8
+      timezone: Asia/Tokyo # e.g. America/Chicago
+
+      limits:
+        - name: core
+          type: soft
+          value: unlimited
+        - name: core
+          type: hard
+          value: unlimited
+        - name: stack
+          type: soft
+          value: 2048000
+        - name: stack
+          type: hard
+          value: 2048000
+        - name: nofile
+          type: soft
+          value: 1048576
+        - name: nofile
+          type: hard
+          value: 1048576
+        - name: memlock
+          type: soft
+          value: unlimited
+        - name: memlock
+          type: hard
+          value: unlimited
+        - name: nproc
+          type: '-'
+          value: unlimited
+
+      password_auth:
+        conf_file: /etc/pam.d/password-auth
+        param: password required pam_pwhistory.so use_authtok remember=1 retry=3
+
+      system_auth:
+        conf_file: /etc/pam.d/system-auth
+        param: password required pam_pwhistory.so use_authtok remember=1 retry=3
+
+      pkgs:
+        - emacs
+        - zstd
+        - crash
+        - vim
+        - man-pages
+        - lsof
+        - libpwquality
+        - ksh
+        - glibc-common
+        - glibc-langpack-ja
+        - gdb
+        - firewalld
+        - net-tools
+        - libnsl
+        - chrony
+        - nfs-utils
+
+      sysctl_params:
+        - name: kernel.core_pattern
+          value: /var/crash/core_%e_%p_%h_%t
+        - name: kernel.core_uses_pid
+          value: 1
+        - name: fs.suid_dumpable
+          value: 1
+        - name: net.ipv6.conf.all.disable_ipv6
+          value: 1
+
+      chrony:
+        conf_file: /etc/chrony.conf
+        params:
+          - server 192.168.110.3 iburst
+          - server 192.168.110.4 iburst
+          - driftfile /var/lib/chrony/drift
+          - logdir /var/log/chrony
+          - makestep 100 10
+          - log measurements statistics tracking
+          - keyfile /etc/chrony.keys
+          - local stratum 10
+          - allow 192.168.110.3
+          - allow 192.168.110.4
+

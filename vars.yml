@@ -1,0 +1,118 @@
+---
+etcd_version: etcd-v3.5.17-linux-amd64
+postgresql_version: postgresql-17.4
+patroni_version: etcd-v3.5.17-linux-amd64.tar.gz
+########################### Groups ########################
+sys_groups:
+  postgres:
+    name: postgres
+    gid: 4504
+  etcd:
+    name: etcd
+    gid: 4505
+  patroni:
+    name: patroni
+    gid: 4506
+########################### Users ########################
+# password is created by the mkpasswd utility
+sys_users:
+  postgres:
+    name: postgres
+    uid: 4513
+    shell: /bin/bash
+    groups: "{{ sys_groups.postgres.name }}"
+    home: /home/appmi
+    generate_ssh_key: yes
+    ssh_key_file: .ssh/id_rsa
+    ssh_key_bits: 2048
+    password: '$y$j9T$rk64vx1Oyk79bK1z3ryxN/$iQij7eLTQEAYAgnrNA6kAQr./YOs.KWKWtv2d7Goh/7' #postgres
+  etcd:
+    name: etcd
+    uid: 4514
+    shell: /bin/bash
+    groups: "{{ sys_groups.etcd.name }}"
+    home: /home/patroni
+    generate_ssh_key: yes
+    ssh_key_file: .ssh/id_rsa
+    ssh_key_bits: 2048
+    password: '$y$j9T$x0CJzE.sLdfiK3pJ82UVM/$xJRrJTHuAAMC2./7saLfONwHNfzTr9U/PEvxszMia5C' #etcd
+  patroni:
+    name: patroni
+    uid: 4515
+    shell: /bin/bash
+    groups: "{{ sys_groups.patroni.name }}"
+    home: /home/patroni
+    generate_ssh_key: yes
+    ssh_key_file: .ssh/id_rsa
+    ssh_key_bits: 2048
+    password: '$y$j9T$94DFVXVQVs9EMy80D/Xit0$X3Ti3Ke.BqXmu6b.xyYAUMLg6jQE6a4D9/o4FXydum/' #patroni
+########################### Servers ########################
+servers:
+  DB:
+    ports:
+      - "5432/tcp"
+
+    services: []
+
+    sys_groups:
+      - "{{ sys_groups.postgres }}"
+      - "{{ sys_groups.patroni }}"
+
+    sys_users:
+      - user: "{{ sys_users.patroni }}"
+        profiles: []
+      - user: "{{ sys_users.postgres }}"
+        profiles:
+          - src: "templates/bash_profile_postgres.j2"
+            dest: "/home/postgres/.bash_profile"
+
+    log_files: []
+
+    sysctl_params: []
+
+    pkgs: []
+############################## ETCD's #################################
+  ETCD:
+    ports:
+      - "2380/tcp"
+      - "2379/tcp"
+
+    services: []
+
+    sys_groups:
+      - "{{ sys_groups.etcd }}"
+
+    sys_users:
+      - user: "{{ sys_users.etcd }}"
+        profiles: []
+
+    log_files:
+      - /var/log/
+      - /var/log/audit/
+
+    sysctl_params: []
+
+    pkgs: []
+########################### Apps ########################
+apps:
+  etcd:
+    compressed: "{{ etcd_version }}.tar.gz"
+    version: "{{ etcd_version}}"
+    templates:
+      - src: "etcd.service.j2"
+        dest: "/etc/systemd/system/etcd.service"
+      - src: "etcd.env.j2"
+        dest: "/etc/etcd.env"
+  postgresql:
+    app_base_dir: "/product/postgresql"
+    compressed: "{{ postgresql_version }}.tar.zst"
+    version: "{{ postgresql_version}}"
+    current_version_dir: "/product/postgresql/{{ postgresql_version}}"
+    ver: "/product/postgresql/ver"
+  patroni:
+    app_base_dir: "/product/patroni"
+    compressed: "{{ patroni_version }}.tar.gz"
+    version: "{{ patroni_version }}"
+    current_version_dir: "/product/patroni/{{ patroni_version }}"
+    ver: "/product/patroni/ver"
+

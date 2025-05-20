@@ -1,0 +1,16 @@
+---
+- hosts: ETCD
+  become: yes
+  gather_facts: false
+
+  vars_files:
+    - vars.yml
+
+  roles:
+    - role: groups
+      tags: groups
+    - role: users
+      tags: users
+    - role: etcd
+      tags: etcd
+

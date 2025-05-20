@@ -1,0 +1,11 @@
+---
+- name: copy profiles
+  ansible.builtin.template:
+    src: "{{ profile.src }}"
+    dest: "{{ profile.dest }}"
+    owner: "{{ item.user.name }}"
+    group: "{{ item.user.groups }}"
+  loop: "{{ item.profiles }}"
+  loop_control:
+    loop_var: profile
+
