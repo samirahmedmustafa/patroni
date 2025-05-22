@@ -98,11 +98,6 @@ apps:
   etcd:
     compressed: "{{ etcd_version }}.tar.gz"
     version: "{{ etcd_version}}"
-    templates:
-      - src: "etcd.service.j2"
-        dest: "/etc/systemd/system/etcd.service"
-      - src: "etcd.env.j2"
-        dest: "/etc/etcd.env"
   postgresql:
     app_base_dir: "/product/postgresql"
     compressed: "{{ postgresql_version }}.tar.zst"

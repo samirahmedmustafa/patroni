@@ -25,3 +25,23 @@
         group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
         state: link
 
+    - name: create extra dir
+      ansible.builtin.file:
+        path: "{{ item }}"
+        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
+        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        state: directory
+      loop: "{{ postgresql.dirs }}"
+
+    - name: write postgres jinj2 templates
+      ansible.builtin.template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop: "{{ postgresql.templates }}"
+
+    - name: extract compressed apps into /product/[app_dir]
+      ansible.builtin.unarchive:
+        src: "http://{{ ansible_ip }}/download/{{ apps.etcd.compressed }}"
+        dest: "/tmp/"
+        remote_src: yes
+

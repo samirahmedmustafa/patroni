@@ -8,6 +8,38 @@
         dest: "/tmp/"
         remote_src: yes
 
+    - name: create extra dir
+      ansible.builtin.file:
+        path: "{{ item }}"
+        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
+        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        state: directory
+      loop: "{{ extra_dirs }}"
+
+    - name: Download CA cert
+      ansible.builtin.get_url:
+        url: "http://{{ ansible_ip }}/download/{{ certs.ca.src }}"
+        dest: "{{ certs.ca.dest }}"
+        mode: 0644
+        owner: etcd
+        group: etcd
+
+    - name: Download key
+      ansible.builtin.get_url:
+        url: "http://{{ ansible_ip }}/download/{{ certs.key.src }}"
+        dest: "{{ certs.key.dest }}"
+        mode: 0600
+        owner: etcd
+        group: etcd
+
+    - name: Download cert
+      ansible.builtin.get_url:
+        url: "http://{{ ansible_ip }}/download/{{ certs.crt.src }}"
+        dest: "{{ certs.crt.dest }}"
+        mode: 0644
+        owner: etcd
+        group: etcd
+
     - name: copy the etcd binaries in the remote machines
       ansible.builtin.copy:
         src: "/tmp/{{ apps.etcd.version }}/{{ item }}"
@@ -18,10 +50,10 @@
         - etcdutl
         - etcdctl
         - etcd
+
     - name: write etcd jinj2 templates
       ansible.builtin.template:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
-          #notify: restart_tomcat
-      loop: "{{ apps.etcd.templates }}"
+      loop: "{{ templates }}"
 

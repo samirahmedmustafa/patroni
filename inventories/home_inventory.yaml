@@ -3,13 +3,51 @@ ETCD:
   hosts:
     etcdhaproxy01:
       ansible_host: 192.168.11.28
+      certs:
+        ca:
+          src: ca.crt
+          dest: /etc/etcd/ssl/ca.crt
+        key:
+          src: etcd-server1.key
+          dest: /etc/etcd/ssl/etcd-server1.key
+        crt:
+          src: etcd-server1.key
+          dest: /etc/etcd/ssl/etcd-server1.crt
     etcdhaproxy02:
       ansible_host: 192.168.11.29
+      certs:
+        ca:
+          src: ca.crt
+          dest: /etc/etcd/ssl/ca.crt
+        key:
+          src: etcd-server2.key
+          dest: /etc/etcd/ssl/etcd-server2.key
+        crt:
+          src: etcd-server2.key
+          dest: /etc/etcd/ssl/etcd-server2.crt
     etcdhaproxy03:
       ansible_host: 192.168.11.30
+      certs:
+        ca:
+          src: ca.crt
+          dest: /etc/etcd/ssl/ca.crt
+        key:
+          src: etcd-server3.key
+          dest: /etc/etcd/ssl/etcd-server3.key
+        crt:
+          src: etcd-server3.key
+          dest: /etc/etcd/ssl/etcd-server3.crt
   vars:
     ports: []
     environ: runtime
+    extra_dirs:
+      - /etc/etcd/ssl/
+      - /product/etcd/data/
+    templates:
+      - src: "etcd.service.j2"
+        dest: "/etc/systemd/system/etcd.service"
+      - src: "etcd.env.j2"
+        dest: "/etc/etcd.env"
 DB:
   hosts:
     patroni1:
@@ -19,6 +57,19 @@ DB:
     patroni3:
       ansible_host: 192.168.11.33
   vars:
+    postgresql:
+      certs:
+        key:
+          src: server.key
+          dest: /product/postgresql/ssl/server.key
+        crt:
+          src: server.crt
+          dest: /product/postgresql/ssl/server.crt
+      templates:
+        - src: postgresql.service.j2
+          dest: postgresql.service.j2
+      data_dir: /product/postgresql/data
+      ssl_dir: /product/postgresql/ssl
     ports: []
     environ: runtime
 all:
