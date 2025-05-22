@@ -40,14 +40,14 @@ ETCD:
   vars:
     ports: []
     environ: runtime
-    extra_dirs:
-      - /etc/etcd/ssl/
-      - /product/etcd/data/
+    conf_dir: /etc/etcd/
+    ssl_dir: /etc/etcd/ssl/
+    data_dir: /product/etcd/data/
     templates:
       - src: "etcd.service.j2"
         dest: "/etc/systemd/system/etcd.service"
       - src: "etcd.env.j2"
-        dest: "/etc/etcd.env"
+        dest: "/etc/etcd/etcd.env"
 DB:
   hosts:
     patroni1:
@@ -57,19 +57,21 @@ DB:
     patroni3:
       ansible_host: 192.168.11.33
   vars:
-    postgresql:
-      certs:
-        key:
-          src: server.key
-          dest: /product/postgresql/ssl/server.key
-        crt:
-          src: server.crt
-          dest: /product/postgresql/ssl/server.crt
-      templates:
-        - src: postgresql.service.j2
-          dest: postgresql.service.j2
-      data_dir: /product/postgresql/data
-      ssl_dir: /product/postgresql/ssl
+    ssl_dir: /product/postgresql/ssl/
+    data_dir: /product/postgresql/data/
+    certs:
+      key:
+        src: server.key
+        dest: /product/postgresql/ssl/server.key
+      crt:
+        src: server.crt
+        dest: /product/postgresql/ssl/server.crt
+    templates:
+      - src: postgresql.service.j2
+        dest: /etc/systemd/system/postgresql.service
+    extra_dirs:
+      - /product/postgresql/data
+      - /product/postgresql/ssl
     ports: []
     environ: runtime
 all:

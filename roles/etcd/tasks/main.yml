@@ -8,13 +8,19 @@
         dest: "/tmp/"
         remote_src: yes
 
-    - name: create extra dir
+    - name: create data dir
       ansible.builtin.file:
-        path: "{{ item }}"
+        path: "{{ data_dir }}"
         owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
         group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
         state: directory
-      loop: "{{ extra_dirs }}"
+
+    - name: create ssl dir
+      ansible.builtin.file:
+        path: "{{ ssl_dir }}"
+        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
+        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        state: directory
 
     - name: Download CA cert
       ansible.builtin.get_url:

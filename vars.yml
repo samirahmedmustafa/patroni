@@ -21,7 +21,7 @@ sys_users:
     uid: 4513
     shell: /bin/bash
     groups: "{{ sys_groups.postgres.name }}"
-    home: /home/appmi
+    home: /home/postgres
     generate_ssh_key: yes
     ssh_key_file: .ssh/id_rsa
     ssh_key_bits: 2048
@@ -31,7 +31,7 @@ sys_users:
     uid: 4514
     shell: /bin/bash
     groups: "{{ sys_groups.etcd.name }}"
-    home: /home/patroni
+    home: /home/etcd
     generate_ssh_key: yes
     ssh_key_file: .ssh/id_rsa
     ssh_key_bits: 2048
@@ -59,12 +59,12 @@ servers:
       - "{{ sys_groups.patroni }}"
 
     sys_users:
-      - user: "{{ sys_users.patroni }}"
-        profiles: []
       - user: "{{ sys_users.postgres }}"
         profiles:
-          - src: "templates/bash_profile_postgres.j2"
+          - src: "postgres_bash_profile.j2"
             dest: "/home/postgres/.bash_profile"
+      - user: "{{ sys_users.patroni }}"
+        profiles: []
 
     log_files: []
 
