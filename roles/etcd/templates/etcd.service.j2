@@ -6,8 +6,8 @@ Wants=network-online.target
 
 [Service] 
 Type=notify 
-WorkingDirectory={{ data_dir }}
-EnvironmentFile={{ conf_dir }}/etcd.env 
+WorkingDirectory={{ etcd.data_dir }}
+EnvironmentFile={{ etcd.conf_dir }}/etcd.env 
 ExecStart=/usr/local/bin/etcd 
 Restart=always 
 RestartSec=10s 

@@ -5,63 +5,87 @@
     - name: create dir
       ansible.builtin.file:
         path: "{{ apps.postgresql.app_base_dir }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
         state: directory
 
     - name: extract compressed apps into /product/[app_dir]
       ansible.builtin.unarchive:
         src: "http://{{ ansible_ip }}/download/{{ apps.postgresql.compressed }}"
         dest: "{{ apps.postgresql.app_base_dir }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
         remote_src: yes
 
     - name: create ver sym links
       ansible.builtin.file:
         dest: "{{ apps.postgresql.ver }}"
         src: "{{ apps.postgresql.version }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
         state: link
 
     - name: create ssl dir
       ansible.builtin.file:
-        path: "{{ ssl_dir }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        path: "{{ postgresql.ssl_dir }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
         state: directory
 
     - name: create data dir
       ansible.builtin.file:
-        path: "{{ data_dir }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        path: "{{ postgresql.data_dir }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
         state: directory
 
     - name: Download key
       ansible.builtin.get_url:
-        url: "http://{{ ansible_ip }}/download/{{ certs.key.src }}"
-        dest: "{{ certs.key.dest }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        url: "http://{{ ansible_ip }}/download/{{ postgresql.certs.key.src }}"
+        dest: "{{ postgresql.certs.key.dest }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
         mode: 0600
         force: true
 
     - name: Download cert
       ansible.builtin.get_url:
-        url: "http://{{ ansible_ip }}/download/{{ certs.crt.src }}"
-        dest: "{{ certs.crt.dest }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        url: "http://{{ ansible_ip }}/download/{{ postgresql.certs.crt.src }}"
+        dest: "{{ postgresql.certs.crt.dest }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
         mode: 0644
         force: true
+
+    - name: Grant user postgres read access to key cert
+      ansible.posix.acl:
+        path: "{{ certs.key.dest }}"
+        entity: "{{ sys_users.postgres.name }}"
+        etype: user
+        permissions: r
+        state: present
+
+    - name: Grant user postgres read access to crt cert
+      ansible.posix.acl:
+        path: "{{ certs.crt.dest }}"
+        entity: "{{ sys_users.postgres.name }}"
+        etype: user
+        permissions: r
+        state: present
+
+    - name: Grant user postgres read access to ca cert
+      ansible.posix.acl:
+        path: "{{ certs.ca.dest }}"
+        entity: "{{ sys_users.postgres.name }}"
+        etype: user
+        permissions: r
+        state: present
 
     - name: write postgres jinj2 templates
       ansible.builtin.template:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
-      loop: "{{ templates }}"
+      loop: "{{ postgresql.templates }}"
 
     - name: extract compressed apps into /product/[app_dir]
       ansible.builtin.unarchive:

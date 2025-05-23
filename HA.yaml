@@ -1,5 +1,5 @@
 ---
-- hosts: ETCD
+- hosts: HA
   become: yes
   gather_facts: false
 
@@ -11,6 +11,4 @@
       tags: groups
     - role: users
       tags: users
-    - role: etcd
-      tags: etcd
 

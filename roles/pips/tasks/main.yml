@@ -1,0 +1,6 @@
+---
+# tasks file for roles/pips
+- name: Install pip pkgs
+  ansible.builtin.pip:
+    name: "{{ servers.DB.pips }}"
+

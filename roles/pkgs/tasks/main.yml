@@ -1,0 +1,7 @@
+---
+# tasks file for roles/pkgs
+- name: Install the latest version of Apache
+  ansible.builtin.dnf:
+    name: "{{ servers.DB.pkgs }}"
+    state: latest
+

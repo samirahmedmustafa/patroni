@@ -13,6 +13,12 @@
       tags: groups
     - role: users
       tags: users
+    - role: etcd
+      tags: etcd
+    - role: pkgs
+      tags: pkgs
+    - role: pips
+      tags: pips
     - role: postgresql
       tags: postgresql
     - role: patroni

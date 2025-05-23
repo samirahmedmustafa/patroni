@@ -1,8 +1,19 @@
 ---
 ETCD:
   hosts:
-    etcdhaproxy01:
+    haproxy01:
       ansible_host: 192.168.11.28
+    haproxy02:
+      ansible_host: 192.168.11.29
+    haproxy03:
+      ansible_host: 192.168.11.30
+  vars:
+    ports: []
+    environ: runtime
+DB:
+  hosts:
+    patroni1:
+      ansible_host: 192.168.11.31
       certs:
         ca:
           src: ca.crt
@@ -11,10 +22,10 @@ ETCD:
           src: etcd-server1.key
           dest: /etc/etcd/ssl/etcd-server1.key
         crt:
-          src: etcd-server1.key
+          src: etcd-server1.crt
           dest: /etc/etcd/ssl/etcd-server1.crt
-    etcdhaproxy02:
-      ansible_host: 192.168.11.29
+    patroni2:
+      ansible_host: 192.168.11.32
       certs:
         ca:
           src: ca.crt
@@ -23,10 +34,10 @@ ETCD:
           src: etcd-server2.key
           dest: /etc/etcd/ssl/etcd-server2.key
         crt:
-          src: etcd-server2.key
+          src: etcd-server2.crt
           dest: /etc/etcd/ssl/etcd-server2.crt
-    etcdhaproxy03:
-      ansible_host: 192.168.11.30
+    patroni3:
+      ansible_host: 192.168.11.33
       certs:
         ca:
           src: ca.crt
@@ -35,43 +46,36 @@ ETCD:
           src: etcd-server3.key
           dest: /etc/etcd/ssl/etcd-server3.key
         crt:
-          src: etcd-server3.key
+          src: etcd-server3.crt
           dest: /etc/etcd/ssl/etcd-server3.crt
   vars:
-    ports: []
-    environ: runtime
-    conf_dir: /etc/etcd/
-    ssl_dir: /etc/etcd/ssl/
-    data_dir: /product/etcd/data/
-    templates:
-      - src: "etcd.service.j2"
-        dest: "/etc/systemd/system/etcd.service"
-      - src: "etcd.env.j2"
-        dest: "/etc/etcd/etcd.env"
-DB:
-  hosts:
-    patroni1:
-      ansible_host: 192.168.11.31
-    patroni2:
-      ansible_host: 192.168.11.32
-    patroni3:
-      ansible_host: 192.168.11.33
-  vars:
-    ssl_dir: /product/postgresql/ssl/
-    data_dir: /product/postgresql/data/
-    certs:
-      key:
-        src: server.key
-        dest: /product/postgresql/ssl/server.key
-      crt:
-        src: server.crt
-        dest: /product/postgresql/ssl/server.crt
-    templates:
-      - src: postgresql.service.j2
-        dest: /etc/systemd/system/postgresql.service
-    extra_dirs:
-      - /product/postgresql/data
-      - /product/postgresql/ssl
+    etcd:
+      conf_dir: /etc/etcd/
+      ssl_dir: /etc/etcd/ssl/
+      data_dir: /product/etcd/data/
+      templates:
+        service:
+          src: "etcd.service.j2"
+          dest: "/etc/systemd/system/etcd.service"
+        etcdenv: 
+          src: "etcd.env.j2"
+          dest: "/etc/etcd/etcd.env"
+    postgresql:
+      ssl_dir: /product/postgresql/ssl/
+      data_dir: /product/postgresql/data/
+      certs:
+        key:
+          src: server.key
+          dest: /product/postgresql/ssl/server.key
+        crt:
+          src: server.crt
+          dest: /product/postgresql/ssl/server.crt
+      templates:
+        - src: postgresql.service.j2
+          dest: /etc/systemd/system/postgresql.service
+      extra_dirs:
+        - /product/postgresql/data
+        - /product/postgresql/ssl
     ports: []
     environ: runtime
 all:

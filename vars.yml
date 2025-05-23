@@ -51,12 +51,15 @@ servers:
   DB:
     ports:
       - "5432/tcp"
+      - "2380/tcp"
+      - "2379/tcp"
 
     services: []
 
     sys_groups:
       - "{{ sys_groups.postgres }}"
       - "{{ sys_groups.patroni }}"
+      - "{{ sys_groups.etcd }}"
 
     sys_users:
       - user: "{{ sys_users.postgres }}"
@@ -65,26 +68,28 @@ servers:
             dest: "/home/postgres/.bash_profile"
       - user: "{{ sys_users.patroni }}"
         profiles: []
+      - user: "{{ sys_users.etcd }}"
+        profiles: []
 
     log_files: []
 
     sysctl_params: []
 
-    pkgs: []
+    pkgs:
+      - python3-pip
+
+    pips:
+      - psycopg
+      - patroni==4.0.5
 ############################## ETCD's #################################
-  ETCD:
-    ports:
-      - "2380/tcp"
-      - "2379/tcp"
+  HA:
+    ports: []
 
     services: []
 
-    sys_groups:
-      - "{{ sys_groups.etcd }}"
+    sys_groups: []
 
-    sys_users:
-      - user: "{{ sys_users.etcd }}"
-        profiles: []
+    sys_users: []
 
     log_files:
       - /var/log/

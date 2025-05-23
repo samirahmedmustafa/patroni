@@ -10,16 +10,16 @@
 
     - name: create data dir
       ansible.builtin.file:
-        path: "{{ data_dir }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        path: "{{ etcd.data_dir }}"
+        owner: "{{ sys_users.etcd.name }}"
+        group: "{{ sys_groups.etcd.name }}"
         state: directory
 
     - name: create ssl dir
       ansible.builtin.file:
-        path: "{{ ssl_dir }}"
-        owner: "{{ servers[group_names[0]]['sys_users'][0].user.name }}"
-        group: "{{ servers[group_names[0]]['sys_users'][0].user.groups }}"
+        path: "{{ etcd.ssl_dir }}"
+        owner: "{{ sys_users.etcd.name }}"
+        group: "{{ sys_groups.etcd.name }}"
         state: directory
 
     - name: Download CA cert
@@ -27,24 +27,27 @@
         url: "http://{{ ansible_ip }}/download/{{ certs.ca.src }}"
         dest: "{{ certs.ca.dest }}"
         mode: 0644
-        owner: etcd
-        group: etcd
+        owner: "{{ sys_users.etcd.name }}"
+        group: "{{ sys_groups.etcd.name }}"
+        force: true
 
     - name: Download key
       ansible.builtin.get_url:
         url: "http://{{ ansible_ip }}/download/{{ certs.key.src }}"
         dest: "{{ certs.key.dest }}"
         mode: 0600
-        owner: etcd
-        group: etcd
+        owner: "{{ sys_users.etcd.name }}"
+        group: "{{ sys_groups.etcd.name }}"
+        force: true
 
     - name: Download cert
       ansible.builtin.get_url:
         url: "http://{{ ansible_ip }}/download/{{ certs.crt.src }}"
         dest: "{{ certs.crt.dest }}"
         mode: 0644
-        owner: etcd
-        group: etcd
+        owner: "{{ sys_users.etcd.name }}"
+        group: "{{ sys_groups.etcd.name }}"
+        force: true
 
     - name: copy the etcd binaries in the remote machines
       ansible.builtin.copy:
@@ -57,9 +60,14 @@
         - etcdctl
         - etcd
 
-    - name: write etcd jinj2 templates
+    - name: write etcd service jinja2 templates
       ansible.builtin.template:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-      loop: "{{ templates }}"
+        src: "{{ etcd.templates.service.src }}"
+        dest: "{{ etcd.templates.service.dest }}"
 
+    - name: write etcd env jinja2 templates
+      ansible.builtin.template:
+        src: "{{ etcd.templates.etcdenv.src }}"
+        dest: "{{ etcd.templates.etcdenv.dest }}"
+        owner: "{{ sys_users.etcd.name }}"
+        group: "{{ sys_groups.etcd.name }}"
