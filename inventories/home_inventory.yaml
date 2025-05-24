@@ -1,5 +1,5 @@
 ---
-ETCD:
+HA:
   hosts:
     haproxy01:
       ansible_host: 192.168.11.28
@@ -49,6 +49,13 @@ DB:
           src: etcd-server3.crt
           dest: /etc/etcd/ssl/etcd-server3.crt
   vars:
+    patroni:
+      conf_dir: /etc/patroni/
+      templates:
+        - src: patroni.yml.j2
+          dest: /etc/patroni/patroni.yml
+        - src: patroni.service.j2
+          dest: /etc/systemd/system/patroni.service
     etcd:
       conf_dir: /etc/etcd/
       ssl_dir: /etc/etcd/ssl/
@@ -70,6 +77,9 @@ DB:
         crt:
           src: server.crt
           dest: /product/postgresql/ssl/server.crt
+        pem:
+          src: server.pem
+          dest: /product/postgresql/ssl/server.pem
       templates:
         - src: postgresql.service.j2
           dest: /etc/systemd/system/postgresql.service

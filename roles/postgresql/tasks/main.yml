@@ -37,6 +37,7 @@
         path: "{{ postgresql.data_dir }}"
         owner: "{{ sys_users.postgres.name }}"
         group: "{{ sys_groups.postgres.name }}"
+        mode: 0700
         state: directory
 
     - name: Download key
@@ -55,6 +56,15 @@
         owner: "{{ sys_users.postgres.name }}"
         group: "{{ sys_groups.postgres.name }}"
         mode: 0644
+        force: true
+
+    - name: Download pem
+      ansible.builtin.get_url:
+        url: "http://{{ ansible_ip }}/download/{{ postgresql.certs.pem.src }}"
+        dest: "{{ postgresql.certs.pem.dest }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
+        mode: 0600
         force: true
 
     - name: Grant user postgres read access to key cert
@@ -92,4 +102,19 @@
         src: "http://{{ ansible_ip }}/download/{{ apps.etcd.compressed }}"
         dest: "/tmp/"
         remote_src: yes
+
+    - name: create patroni conf dir
+      ansible.builtin.file:
+        path: "{{ patroni.conf_dir }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
+        state: directory
+    
+    - name: write patroni config
+      ansible.builtin.template:
+        src: "templates/{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: "{{ sys_users.postgres.name }}"
+        group: "{{ sys_groups.postgres.name }}"
+      loop: "{{ patroni.templates }}"
 
