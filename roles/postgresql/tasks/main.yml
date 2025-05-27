@@ -25,12 +25,13 @@
         group: "{{ sys_groups.postgres.name }}"
         state: link
 
-    - name: create ssl dir
+    - name: create extra dirs
       ansible.builtin.file:
-        path: "{{ postgresql.ssl_dir }}"
+        path: "{{ item }}"
         owner: "{{ sys_users.postgres.name }}"
         group: "{{ sys_groups.postgres.name }}"
         state: directory
+      loop: "{{ postgresql.extra_dirs }}"
 
     - name: create data dir
       ansible.builtin.file:
@@ -96,25 +97,4 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       loop: "{{ postgresql.templates }}"
-
-    - name: extract compressed apps into /product/[app_dir]
-      ansible.builtin.unarchive:
-        src: "http://{{ ansible_ip }}/download/{{ apps.etcd.compressed }}"
-        dest: "/tmp/"
-        remote_src: yes
-
-    - name: create patroni conf dir
-      ansible.builtin.file:
-        path: "{{ patroni.conf_dir }}"
-        owner: "{{ sys_users.postgres.name }}"
-        group: "{{ sys_groups.postgres.name }}"
-        state: directory
-    
-    - name: write patroni config
-      ansible.builtin.template:
-        src: "templates/{{ item.src }}"
-        dest: "{{ item.dest }}"
-        owner: "{{ sys_users.postgres.name }}"
-        group: "{{ sys_groups.postgres.name }}"
-      loop: "{{ patroni.templates }}"
 

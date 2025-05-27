@@ -21,4 +21,6 @@
       tags: pips
     - role: postgresql
       tags: postgresql
+    - role: patroni
+      tags: patroni
 

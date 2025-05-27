@@ -1,0 +1,17 @@
+---
+# tasks file for roles/patroni
+- name: create patroni conf dir
+  ansible.builtin.file:
+    path: "{{ patroni.conf_dir }}"
+    owner: "{{ sys_users.postgres.name }}"
+    group: "{{ sys_groups.postgres.name }}"
+    state: directory
+
+- name: write patroni config
+  ansible.builtin.template:
+    src: "templates/{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ sys_users.postgres.name }}"
+    group: "{{ sys_groups.postgres.name }}"
+  loop: "{{ patroni.templates }}"
+

@@ -68,7 +68,6 @@ DB:
           src: "etcd.env.j2"
           dest: "/etc/etcd/etcd.env"
     postgresql:
-      ssl_dir: /product/postgresql/ssl/
       data_dir: /product/postgresql/data/
       certs:
         key:
@@ -84,6 +83,7 @@ DB:
         - src: postgresql.service.j2
           dest: /etc/systemd/system/postgresql.service
       extra_dirs:
+        - /product/postgresql/log
         - /product/postgresql/data
         - /product/postgresql/ssl
     ports: []

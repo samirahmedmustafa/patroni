@@ -15,6 +15,17 @@ restapi:
   connect_address: {{ ansible_host }}:8008  # IP for node1's REST API
   certfile: {{ postgresql.certs.pem.dest }}
 
+log:
+   dir: /product/postgresql/log
+   type: json
+   format:
+      - message
+      - module
+      - asctime: '@timestamp'
+      - levelname: level
+   static_fields:
+      app: patroni
+
 bootstrap:
   dcs:
     ttl: 30
@@ -39,6 +50,7 @@ bootstrap:
 
 postgresql:
   listen: 0.0.0.0:5432
+
   connect_address: {{ ansible_host }}:5432  # IP for node1's PostgreSQL
   data_dir: {{ postgresql.data_dir }}
   bin_dir: /product/postgresql/ver/bin/  # Binary directory for PostgreSQL 17
@@ -51,10 +63,12 @@ postgresql:
       password: sad9a23jga8jsuedrwtsskj74567suiuwe23  # Replication password - be sure to change
   parameters:
     max_connections: 100
+    archive_cleanup_command: 'pg_archivecleanup archivelocation %r'
     shared_buffers: 256MB
 
 tags:
   nofailover: false
   noloadbalance: false
   clonefrom: false
+
 
