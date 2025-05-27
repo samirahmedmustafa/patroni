@@ -4,7 +4,7 @@ namespace: /service/
 name: {{ inventory_hostname }}
 
 etcd3:
-  hosts: 192.168.11.31:2379,192.168.11.32:2379,192.168.11.33:2379  # etcd cluster nodes
+  hosts: {{ groups['DB'] | map('extract', hostvars, 'ansible_host') | map('regex_replace', '$', ':2379') | join(',') }}
   protocol: https
   cacert: {{ certs.ca.dest }}
   cert: {{ certs.crt.dest }}  # node1's etcd certificate
@@ -39,9 +39,9 @@ bootstrap:
             ssl_key_file: {{ postgresql.certs.pem.dest }}  # PostgreSQL server key
         pg_hba:  # Access rules
         - hostssl replication replicator 127.0.0.1/32 md5
-        - hostssl replication replicator 192.168.11.31/32 md5
-        - hostssl replication replicator 192.168.11.32/32 md5
-        - hostssl replication replicator 192.168.11.33/32 md5
+{% for item in groups['DB'] %}
+        - hostssl replication replicator {{ hostvars[item].ansible_host }}/32 md5
+{% endfor %}
         - hostssl all all 127.0.0.1/32 md5
         - hostssl all all 0.0.0.0/0 md5
   initdb:
