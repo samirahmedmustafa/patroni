@@ -79,6 +79,7 @@ servers:
     pips:
       - patroni==4.0.5
       - patroni[etcd]
+      - python-json-logger
       - psycopg2-binary==2.9.10
 ############################## ETCD's #################################
   HA:
